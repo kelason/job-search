@@ -1,0 +1,16 @@
+# Only the ph-job-search skill is tracked in this repo.
+# Everything else is local job-search output (applications, resumes,
+# cover letters, trackers, archives, OS files) and is ignored.
+
+# Ignore everything
+*
+
+# Allow Git to descend into directories
+!*/
+
+# Allow this file
+!/.gitignore
+
+# Allow only the ph-job-search skill
+!/.agents/skills/ph-job-search/
+!/.agents/skills/ph-job-search/**
