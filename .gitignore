@@ -8,8 +8,9 @@
 # Allow Git to descend into directories
 !*/
 
-# Allow this file
+# Allow these files
 !/.gitignore
+!/README.md
 
 # Allow only the ph-job-search skill
 !/.agents/skills/ph-job-search/
