@@ -39,7 +39,7 @@ Any agent that loads project skills from `.agents/skills/` will pick it up as `p
 
 On first use the skill collects — or reuses the profile already in `SKILL.md`:
 
-- **Resume** — PDF, DOCX, or plain text. Parsed for name, contact links, roles, stack, education, PH location, work-mode preferences, salary (PHP/month), and notice period.
+- **Resume** — PDF, DOCX, or plain text. Parsed for name, contact links, roles, stack, education, PH location, work-mode preferences, salary (PHP/month), and notice period. On first receipt the skill also builds a **Skill Inventory** (core skills, supporting skills, domain skills, 3–5 skill clusters, synonym variants) — this drives JD skill-driven search, since posting titles are often vague.
 - **Job preferences** — target roles, target locations (Metro Manila, Cebu, Davao, Clark, Iloilo, Remote PH), company type, seniority.
 - **Optional** — salary range, industries/companies to focus on or avoid, deal-breakers (night shift, onsite-only, relocation), benefits expectations.
 
@@ -79,6 +79,10 @@ Natural language works too:
 | 5 | Glassdoor PH | Reviews + salary alongside listings |
 
 All other boards (OnlineJobs.ph, Wellfound, WeWorkRemotely, Upwork, Bossjob, etc.) and company career pages are excluded unless you explicitly name one for that run — it is then labelled user-requested in the report.
+
+### Search strategy (title + JD skill-driven)
+
+Every search runs two tracks. **Track A** searches by target role title + skill. **Track B** is skill-first and title-agnostic: queries are built from the resume Skill Inventory (e.g. `"Laravel" "Vue"`, `"PHP" "MySQL" "Redis"`), the full JD body is fetched, its required skills are extracted, and a **JD Skill Match** is computed. A posting whose title matches no target role is still included when JD Skill Match ≥ 50% with at least 2 core-skill matches — labelled `JD Skill Match` (vs `Title Match`) with the matched JD skills listed per job. Skill-only hits are dropped when the JD's primary stack is one the candidate lacks.
 
 ### Philippines-only rule (hard)
 

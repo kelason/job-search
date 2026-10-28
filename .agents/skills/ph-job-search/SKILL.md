@@ -25,6 +25,13 @@ The workspace owner has provided this profile. Use it as the default; confirm on
 **If no user profile is established in this conversation yet**, collect details before doing anything else:
 
 1. **Resume**: Ask for PDF, DOCX, or plain text if not already known. Parse name, contact links, roles, tech stack, education, current PH location, relocation and onsite/hybrid/remote preferences, current and expected monthly salary in PHP, notice period.
+   - **Build a Skill Inventory from the resume (required on first receipt).** Do not rely on job titles alone — titles in the resume and on boards are inconsistent. Extract and keep for the whole session:
+     - **Core skills** — primary stack the candidate can do day-one (e.g. `PHP, Laravel, Yii2, Vue 2/3, MySQL`).
+     - **Supporting skills** — `REST APIs, Redis, Docker, GitHub Actions, Pest/PHPUnit, SQL optimization`, etc.
+     - **Domain skills** — e.g. online learning platforms, compensation automation, real-time systems, release/incident work.
+     - **Skill clusters** — group the above into 3-5 searchable clusters (e.g. `Backend PHP`, `Full-Stack Laravel/Vue`, `Systems/Platform`). Each cluster becomes a search angle, not just each target title.
+     - **Synonyms / variants** — normalise spelling so JD text matches (e.g. `Yii/Yii2`, `Vue.js/Vue 3`, `JS/TS`, `Postgres/PostgreSQL/PostGIS`).
+   - Confirm the Skill Inventory with the user alongside the profile summary. Update it whenever a new resume is provided. This inventory drives the JD-driven search in `/ph-job-search search` below.
 2. **Job preferences**:
    - Target roles (e.g. Senior Laravel Developer, Vue Frontend, Full-Stack, Systems Engineer, QA, DevOps)
    - Target locations (Metro Manila cities, Cebu, Davao, Clark, Iloilo, Remote PH, abroad with country)
@@ -53,7 +60,7 @@ Display the quick reference below and stop. Do NOT search or apply.
 
 **Platforms searched (5 only):** LinkedIn Philippines, Indeed Philippines, JobStreet Philippines, Kalibrr, Glassdoor Philippines. All other boards are excluded unless you explicitly name them for that run.
 
-**What it does:** searches platforms for matching skills; scores and ranks results; verifies links are live; generates a tailored ATS resume + cover letter per match; bundles materials in a zip by company; tracks applications; optionally reads Gmail for outcomes; runs a weekly self-correction review.
+**What it does:** on first resume receipt, builds a Skill Inventory; searches platforms by target title **and** by skills inside the job description (so vaguely-titled postings with matching JD skills are still found); scores and ranks results; verifies links are live; generates a tailored ATS resume + cover letter per match; bundles materials in a zip by company; tracks applications; optionally reads Gmail for outcomes; runs a weekly self-correction review.
 
 **Privacy:** Data stays in this session. Gmail integration (optional) only reads emails from companies you applied to.
 
@@ -81,6 +88,28 @@ Search only these five. Do not substitute another board when one returns few res
 
 **Excluded by default:** OnlineJobs.ph, Wellfound, WeWorkRemotely, Upwork, Bossjob, GrabJobs, Jora, Built In, JobGether, RemoteFirst, and direct company career pages. Include one only when the user explicitly names it for that run, and label it as user-requested in the report.
 
+#### Search Strategy — Title + JD Skill-Driven (both required)
+
+Run **both** tracks on every search. Track A alone misses good matches because posting titles are often vague, inflated, or mismatched (`Web Developer`, `Software Engineer`, `Systems Engineer`, `IT Specialist`, `Programmer`) while the actual work in the JD is a strong fit.
+
+**Track A — Title search (existing):** queries from the table above using `[role]` + `[skill]` for each target role.
+
+**Track B — JD skill search (skill-first, title-agnostic):** queries built from the resume Skill Inventory, with no target-title constraint:
+
+- Per skill cluster: `site:<board> "[core skill 1]" "[core skill 2]" Philippines` (e.g. `"Laravel" "Vue"`, `"PHP" "MySQL" "Redis"`, `"PHP" "REST API" "Docker"`).
+- Single strong-skill sweeps for generic titles: `site:<board> "Laravel" ("Software Engineer" OR "Web Developer" OR "Developer") Philippines` — and the same with each core skill.
+- Synonym variants from the inventory (e.g. `Yii2` → also `Yii`; `Vue.js` → also `Vue 3`).
+
+**JD skill check (mandatory for Track B, applied to Track A too):**
+
+1. Fetch the full JD body for every candidate — never score on title/snippet alone.
+2. Extract the JD's required + preferred skills list (tools, languages, frameworks, domain terms).
+3. Compute **JD Skill Match** = resume skills found in the JD ÷ JD required skills. Count synonyms as matches.
+4. Include a posting even when its title matches **no** target role if **JD Skill Match ≥ 50%** and at least **2 core skills** match. Label it `JD Skill Match` in the report (vs `Title Match`).
+5. Guard against noise: exclude skill-only hits where the JD's *primary* stack is one the candidate lacks (e.g. JD is primarily Java/.NET/Go and PHP is only incidental), or where seniority/domain in the JD clearly conflicts. Note the reason in the exclusion list.
+
+Feed JD-extracted skills — not title keywords — into the Fitness Score's skills-overlap component. In the per-job note, list the matched JD skills (e.g. `Matched JD skills: Laravel, Vue 3, MySQL, Redis`) so the user sees why a vaguely-titled posting was included.
+
 **Philippines-only rule (hard):**
 - Location must be in the Philippines (Remote PH / WFH Philippines, Metro Manila, Clark, Cebu, Davao, or another PH locality) or explicitly state Philippines-based / PH-remote eligibility.
 - Drop global-remote, US/EU/APAC-only, onsite-abroad, and location-unspecified postings. "Asia remote" counts only if the posting names the Philippines as eligible.
@@ -95,7 +124,7 @@ Every result is a complete application package: job found, scored, tailored resu
 
 - **Job ID:** platform identifier from URL/listing; else `[Platform]-[Company]-[ShortTitle]` (e.g. `JS-Globe-LaravelSr`).
 - **Posted Date:** absolute date; convert "X days ago"; flag 30+ days old with warning; else "Date N/A".
-- **Fitness Score:** holistic fit of the user's EXPERIENCE to the role: skills overlap (3x), years-of-experience match (2x), domain relevance (2x), seniority alignment (2x), project relevance (1x), education fit (1x). Show "85% Fit" plus short reason. Thresholds: 80%+ strong, 60-79% moderate, below 60% stretch (flag it).
+- **Fitness Score:** holistic fit of the user's EXPERIENCE to the role: skills overlap (3x) — measured from **JD-extracted skills vs the resume Skill Inventory**, not title keywords — years-of-experience match (2x), domain relevance (2x), seniority alignment (2x), project relevance (1x), education fit (1x). Show "85% Fit" plus short reason. Thresholds: 80%+ strong, 60-79% moderate, below 60% stretch (flag it).
 - **Cover Letter / Resume:** "Ready" — generated and in the zip.
 - **Apply Link:** direct posting link, verified live this session. Never a search results page.
 
